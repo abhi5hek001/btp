@@ -1,0 +1,17 @@
+name: py27
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=2.7
+  - numpy=1.16
+  - scipy=1.2
+  - scikit-learn=0.20
+  - scikit-image=0.14
+  - matplotlib=2.2
+  - opencv=3.4.2
+  - pip
+  - pip:
+      - transforms3d==0.3.1
+      - chumpy==0.70
+      - PyOpenGL==3.1.0
