@@ -2,6 +2,7 @@ from __future__ import print_function, unicode_literals
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import base64
 
 import pip
 import argparse
@@ -31,13 +32,13 @@ try:
     from utils.eval_util import EvalUtil
 
 except:
-    from fh_utils import *
+    from utils.fh_utils import *
     from eval_util import EvalUtil
 
 
 def verts2pcd(verts, color=None):
-    pcd = o3d.PointCloud()
-    pcd.points = o3d.Vector3dVector(verts)
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(verts)
     if color is not None:
         if color == 'r':
             pcd.paint_uniform_color([1, 0.0, 0])
@@ -51,8 +52,8 @@ def verts2pcd(verts, color=None):
 def calculate_fscore(gt, pr, th=0.01):
     gt = verts2pcd(gt)
     pr = verts2pcd(pr)
-    d1 = o3d.compute_point_cloud_to_point_cloud_distance(gt, pr) # closest dist for each gt point
-    d2 = o3d.compute_point_cloud_to_point_cloud_distance(pr, gt) # closest dist for each pred point
+    d1 = gt.compute_point_cloud_distance(pr)    # closest dist for each gt point
+    d2 = pr.compute_point_cloud_distance(gt)    # closest dist for each pred point
     if len(d1) and len(d2):
         recall = float(sum(d < th for d in d2)) / float(len(d2))  # how many of our predicted points lie close to a gt point?
         precision = float(sum(d < th for d in d1)) / float(len(d1))  # how many of gt points are matched?
@@ -122,7 +123,8 @@ def createHTML(outputDir, curve_list):
         plt.savefig(img_path, bbox_inches=0, dpi=300)
 
         # write image and create html embedding
-        data_uri1 = open(img_path, 'rb').read().encode('base64').replace('\n', '')
+        with open(img_path, 'rb') as f:
+            data_uri1 = base64.b64encode(f.read()).decode('utf-8')
         img_tag1 = 'src="data:image/png;base64,{0}"'.format(data_uri1)
         curve_data_list.append((item.text, img_tag1))
 
